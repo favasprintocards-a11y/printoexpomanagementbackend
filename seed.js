@@ -24,28 +24,7 @@ const seedUsers = async () => {
       console.log('✅ Admin user created (admin / admin123)');
     }
 
-    // Check if default user exists
-    const userExists = await User.findOne({ username: 'user' });
-    if (userExists) {
-      console.log('ℹ️  Default user already exists, skipping...');
-    } else {
-      await User.create({
-        username: 'user',
-        password: 'user123',
-        role: 'User',
-        displayName: 'Expo Staff',
-      });
-      console.log('✅ Default user created (user / user123)');
-    }
 
-    // Check if default expo exists
-    const expoExists = await Expo.findOne({ name: 'Printo Expo Management 2026' });
-    if (expoExists) {
-      console.log('ℹ️  Default expo already exists, skipping...');
-    } else {
-      await Expo.create({ name: 'Printo Expo Management 2026' });
-      console.log('✅ Default expo created (Printo Expo 2026)');
-    }
 
     console.log('\n🎉 Seeding complete!');
     process.exit(0);

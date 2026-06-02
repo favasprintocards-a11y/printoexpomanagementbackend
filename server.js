@@ -24,26 +24,17 @@ connectDB().then(async () => {
       console.log('✅ Auto-seeded Admin user (admin / admin123)');
     }
 
-    // Seed default User
-    const userExists = await User.findOne({ username: 'user' });
-    if (!userExists) {
-      await User.create({
-        username: 'user',
-        password: 'user123',
-        role: 'User',
-        displayName: 'Expo Staff',
-      });
-      console.log('✅ Auto-seeded Default user (user / user123)');
+    // Remove old default user & default expo if they exist
+    const userDeleted = await User.deleteOne({ username: 'user' });
+    if (userDeleted.deletedCount > 0) {
+      console.log('🗑️ Removed default user (user) from database');
     }
-
-    // Seed default Expo
-    const expoExists = await Expo.findOne({ name: 'Printo Expo Management 2026' });
-    if (!expoExists) {
-      await Expo.create({ name: 'Printo Expo Management 2026' });
-      console.log('✅ Auto-seeded Default expo (Printo Expo 2026)');
+    const expoDeleted = await Expo.deleteOne({ name: 'Printo Expo Management 2026' });
+    if (expoDeleted.deletedCount > 0) {
+      console.log('🗑️ Removed default expo (Printo Expo Management 2026) from database');
     }
   } catch (err) {
-    console.error('❌ Auto-seeding error:', err);
+    console.error('❌ Auto-seeding/cleanup error:', err);
   }
 });
 

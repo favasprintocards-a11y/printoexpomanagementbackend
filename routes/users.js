@@ -77,4 +77,42 @@ router.delete('/:id', protect, adminOnly, async (req, res) => {
   }
 });
 
+// @route   PUT /api/users/:id
+// @desc    Update user profile/password (Admin only)
+// @access  Private/Admin
+router.put('/:id', protect, adminOnly, async (req, res) => {
+  try {
+    const { password, displayName, role } = req.body;
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (displayName) user.displayName = displayName;
+    if (role && ['Admin', 'User'].includes(role)) {
+      if (user.username !== 'admin') {
+        user.role = role;
+      }
+    }
+    if (password) {
+      if (password.length < 6) {
+        return res.status(400).json({ message: 'Password must be at least 6 characters' });
+      }
+      user.password = password;
+    }
+
+    await user.save();
+
+    res.json({
+      _id: user._id,
+      username: user.username,
+      displayName: user.displayName,
+      role: user.role,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 module.exports = router;
