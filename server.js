@@ -6,8 +6,46 @@ const connectDB = require('./config/db');
 // Load env vars
 dotenv.config();
 
-// Connect to MongoDB
-connectDB();
+// Connect to MongoDB & Auto-Seed
+connectDB().then(async () => {
+  try {
+    const User = require('./models/User');
+    const Expo = require('./models/Expo');
+
+    // Seed Admin
+    const adminExists = await User.findOne({ username: 'admin' });
+    if (!adminExists) {
+      await User.create({
+        username: 'admin',
+        password: 'admin123',
+        role: 'Admin',
+        displayName: 'Administrator',
+      });
+      console.log('✅ Auto-seeded Admin user (admin / admin123)');
+    }
+
+    // Seed default User
+    const userExists = await User.findOne({ username: 'user' });
+    if (!userExists) {
+      await User.create({
+        username: 'user',
+        password: 'user123',
+        role: 'User',
+        displayName: 'Expo Staff',
+      });
+      console.log('✅ Auto-seeded Default user (user / user123)');
+    }
+
+    // Seed default Expo
+    const expoExists = await Expo.findOne({ name: 'Printo Expo Management 2026' });
+    if (!expoExists) {
+      await Expo.create({ name: 'Printo Expo Management 2026' });
+      console.log('✅ Auto-seeded Default expo (Printo Expo 2026)');
+    }
+  } catch (err) {
+    console.error('❌ Auto-seeding error:', err);
+  }
+});
 
 const app = express();
 
@@ -24,6 +62,11 @@ app.use('/api/expos', require('./routes/expos'));
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Root path handler
+app.get('/', (req, res) => {
+  res.json({ message: 'Printo Expo Management API is running. Access endpoints via /api.' });
 });
 
 // Start server
