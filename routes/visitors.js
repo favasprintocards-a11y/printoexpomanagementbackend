@@ -30,7 +30,7 @@ router.get('/', protect, async (req, res) => {
 // @access  Private
 router.post('/', protect, async (req, res) => {
   try {
-    const { personName, type, companyName, mobile, location, dateTime, expoName } = req.body;
+    const { personName, type, companyName, mobile, location, dateTime, expoName, requirement } = req.body;
 
     const visitor = await Visitor.create({
       personName,
@@ -40,6 +40,7 @@ router.post('/', protect, async (req, res) => {
       location,
       dateTime: dateTime || new Date(),
       expoName,
+      requirement,
       addedBy: req.user._id,
     });
 

@@ -35,6 +35,10 @@ const visitorSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    requirement: {
+      type: String,
+      trim: true,
+    },
     addedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
