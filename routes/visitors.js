@@ -30,11 +30,12 @@ router.get('/', protect, async (req, res) => {
 // @access  Private
 router.post('/', protect, async (req, res) => {
   try {
-    const { personName, type, companyName, mobile, location, dateTime, expoName, requirement } = req.body;
+    const { personName, type, priority, companyName, mobile, location, dateTime, expoName, requirement } = req.body;
 
     const visitor = await Visitor.create({
       personName,
       type,
+      priority: priority || 'Medium',
       companyName,
       mobile,
       location,
@@ -99,6 +100,47 @@ router.delete('/:id', protect, async (req, res) => {
     await visitor.deleteOne();
     res.json({ message: 'Visitor deleted' });
   } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// @route   PUT /api/visitors/:id
+// @desc    Edit a visitor entry
+// @access  Private
+router.put('/:id', protect, async (req, res) => {
+  try {
+    const visitor = await Visitor.findById(req.params.id);
+
+    if (!visitor) {
+      return res.status(404).json({ message: 'Visitor not found' });
+    }
+
+    // Standard user can only edit their own entries
+    if (req.user.role !== 'Admin' && visitor.addedBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Not authorized to edit this record' });
+    }
+
+    const { personName, type, priority, companyName, mobile, location, dateTime, expoName, requirement } = req.body;
+
+    visitor.personName = personName || visitor.personName;
+    visitor.type = type || visitor.type;
+    visitor.priority = priority || visitor.priority;
+    visitor.companyName = companyName !== undefined ? companyName : visitor.companyName;
+    visitor.mobile = mobile || visitor.mobile;
+    visitor.location = location !== undefined ? location : visitor.location;
+    if (dateTime) visitor.dateTime = dateTime;
+    if (expoName) visitor.expoName = expoName;
+    visitor.requirement = requirement !== undefined ? requirement : visitor.requirement;
+
+    await visitor.save();
+
+    const populated = await Visitor.findById(visitor._id).populate('addedBy', 'username displayName');
+    res.json(populated);
+  } catch (error) {
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map((e) => e.message);
+      return res.status(400).json({ message: messages.join(', ') });
+    }
     res.status(500).json({ message: 'Server error' });
   }
 });

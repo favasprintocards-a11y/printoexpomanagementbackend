@@ -12,6 +12,11 @@ const visitorSchema = new mongoose.Schema(
       enum: ['Reseller', 'Customer'],
       required: [true, 'Visitor type is required'],
     },
+    priority: {
+      type: String,
+      enum: ['Low', 'Medium', 'High'],
+      default: 'Medium',
+    },
     companyName: {
       type: String,
       trim: true,
